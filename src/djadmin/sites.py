@@ -16,6 +16,7 @@ from django.db import models
 from django.http import HttpResponseRedirect, JsonResponse
 from django.urls import NoReverseMatch, path, reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 
 from . import __version__
@@ -99,9 +100,15 @@ class DjadminSite(admin.AdminSite):
 
         from .views import DjadminLoginView
 
-        redirect_url = DjadminLoginView().get_redirect_url(request) or reverse(
-            f"{self.name}:index", current_app=self.name
+        # Resolve "next" the way RedirectURLMixin does, rather than calling it:
+        # its signature changed in Django 6.1 and this has to work on 4.2 too.
+        requested = request.POST.get(REDIRECT_FIELD_NAME, request.GET.get(REDIRECT_FIELD_NAME, ""))
+        is_safe = requested and url_has_allowed_host_and_scheme(
+            url=requested,
+            allowed_hosts={request.get_host()},
+            require_https=request.is_secure(),
         )
+        redirect_url = requested if is_safe else reverse(f"{self.name}:index", current_app=self.name)
         if request.method == "GET" and self.has_permission(request):
             return HttpResponseRedirect(redirect_url)
 

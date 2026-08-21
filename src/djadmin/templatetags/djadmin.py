@@ -220,6 +220,10 @@ def dj_object_list(value, max_items=None):
     tree — the same behaviour those versions always had.
     """
     try:
+        max_items = int(max_items)
+    except (TypeError, ValueError):
+        max_items = None  # the setting does not exist on this Django version
+    try:
         from django.contrib.admin.templatetags.admin_filters import truncated_unordered_list
     except ImportError:
         from django.template.defaultfilters import unordered_list
@@ -287,3 +291,21 @@ def dj_percent(value):
         return f"{round(float(value))}%"
     except (TypeError, ValueError):
         return value
+
+
+@register.simple_tag(takes_context=True)
+def dj_change_form_actions(context):
+    """Admin actions on a change form — a Django 6.1 feature.
+
+    Renders Django's own template when it exists, and nothing at all on older
+    versions, so one change_form.html serves every supported release.
+    """
+    if not context.get("action_form"):
+        return ""
+    from django.template import TemplateDoesNotExist
+    from django.template.loader import render_to_string
+
+    try:
+        return mark_safe(render_to_string("admin/change_form_actions.html", context.flatten()))
+    except TemplateDoesNotExist:
+        return ""

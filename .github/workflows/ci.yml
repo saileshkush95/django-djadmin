@@ -1,0 +1,82 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Python ${{ matrix.python }} · Django ${{ matrix.django }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Every combination here is one that has actually been run.
+        include:
+          - { python: "3.10", django: "5.2" }
+          - { python: "3.12", django: "5.2" }
+          - { python: "3.13", django: "6.0" }
+          - { python: "3.13", django: "6.1" }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Set up Python ${{ matrix.python }}
+        run: uv python install ${{ matrix.python }}
+
+      - name: Install djadmin and Django ${{ matrix.django }}
+        run: |
+          uv venv --python ${{ matrix.python }}
+          uv pip install -e . "Django~=${{ matrix.django }}.0" segno
+
+      - name: Django checks
+        working-directory: demo
+        run: uv run --no-project python manage.py check
+
+      - name: Tests
+        working-directory: demo
+        run: uv run --no-project python manage.py test shop -v 2
+
+  package:
+    name: Build and verify the distribution
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Build
+        run: uv build
+
+      - name: Check metadata
+        run: uv run --with twine twine check dist/*
+
+      - name: Install the wheel somewhere clean and render the admin
+        run: |
+          uv venv /tmp/check/.venv --python 3.12
+          uv pip install --python /tmp/check/.venv/bin/python dist/*.whl
+          # Package data - templates, static, migrations - is what silently
+          # goes missing in a build. Prove it is there by using it.
+          python - <<'PY'
+          import zipfile, glob, sys
+          names = zipfile.ZipFile(glob.glob("dist/*.whl")[0]).namelist()
+          required = [
+              "djadmin/templates/admin/base.html",
+              "djadmin/static/djadmin/css/djadmin.css",
+              "djadmin/static/djadmin/js/djadmin.js",
+              "djadmin/migrations/0001_initial.py",
+          ]
+          missing = [name for name in required if name not in names]
+          sys.exit(f"missing from the wheel: {missing}" if missing else 0)
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/

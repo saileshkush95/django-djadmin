@@ -20,16 +20,17 @@
 {% endblock %}
 
 {% block content %}
+{% with max_display=delete_confirmation_max_display %}
 <div class="dj-confirm">
   {% if perms_lacking %}
     {% block delete_forbidden %}
       <div class="dj-alert dj-alert--danger">{% dj_icon "shield" "dj-icon dj-icon--sm" %}<span>{% blocktranslate %}Deleting the {{ object_name }} “{{ escaped_object }}” would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktranslate %}</span></div>
-      <ul id="deleted-objects" class="dj-tree">{{ perms_lacking|dj_object_list:delete_confirmation_max_display }}</ul>
+      <ul id="deleted-objects" class="dj-tree">{{ perms_lacking|dj_object_list:max_display }}</ul>
     {% endblock %}
   {% elif protected %}
     {% block delete_protected %}
       <div class="dj-alert dj-alert--warning">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{% blocktranslate %}Deleting the {{ object_name }} “{{ escaped_object }}” would require deleting the following protected related objects:{% endblocktranslate %}</span></div>
-      <ul id="deleted-objects" class="dj-tree">{{ protected|dj_object_list:delete_confirmation_max_display }}</ul>
+      <ul id="deleted-objects" class="dj-tree">{{ protected|dj_object_list:max_display }}</ul>
     {% endblock %}
   {% else %}
     {% block delete_confirm %}
@@ -42,10 +43,10 @@
           {% include "admin/includes/object_delete_summary.html" %}
         </div>
 
-        {% if delete_confirmation_max_display is None or delete_confirmation_max_display > 0 %}
+        {% if max_display != 0 %}
           <details class="dj-confirm-details">
             <summary>{% translate "Objects" %}</summary>
-            <ul id="deleted-objects" class="dj-tree">{{ deleted_objects|dj_object_list:delete_confirmation_max_display }}</ul>
+            <ul id="deleted-objects" class="dj-tree">{{ deleted_objects|dj_object_list:max_display }}</ul>
           </details>
         {% endif %}
 
@@ -60,4 +61,5 @@
     {% endblock %}
   {% endif %}
 </div>
+{% endwith %}
 {% endblock content %}

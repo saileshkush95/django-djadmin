@@ -1,0 +1,38 @@
+name: Publish to PyPI
+
+# Publishing happens on a tag, and only after CI has passed on it.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv build
+      - run: uv run --with twine twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/django-djadmin
+    permissions:
+      # Trusted Publishing: PyPI verifies this workflow's identity, so no API
+      # token is stored anywhere. Configure it once at
+      # https://pypi.org/manage/project/django-djadmin/settings/publishing/
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

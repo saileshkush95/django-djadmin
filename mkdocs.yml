@@ -1,0 +1,40 @@
+site_name: djadmin
+site_description: A clean, modern UI for the Django admin.
+site_url: https://saileshkush95.github.io/django-djadmin/
+repo_url: https://github.com/saileshkush95/django-djadmin
+repo_name: saileshkush95/django-djadmin
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.sections
+    - content.code.copy
+    - toc.follow
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      toggle: { icon: material/weather-night, name: Dark mode }
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      toggle: { icon: material/weather-sunny, name: Light mode }
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Configuration: configuration.md
+  - ModelAdmin: modeladmin.md
+  - Authentication: authentication.md
+  - Customising: customising.md
+  - Contributing: contributing.md
+  - Analytics design (parked): analytics-design.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc: { permalink: true }
+  - pymdownx.highlight
+  - pymdownx.superfences

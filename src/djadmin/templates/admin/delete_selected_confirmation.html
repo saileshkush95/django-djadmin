@@ -19,13 +19,14 @@
 {% endblock %}
 
 {% block content %}
+{% with max_display=delete_confirmation_max_display %}
 <div class="dj-confirm">
 {% if perms_lacking %}
   <div class="dj-alert dj-alert--danger">{% dj_icon "shield" "dj-icon dj-icon--sm" %}<span>{% blocktranslate %}Deleting the selected {{ objects_name }} would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktranslate %}</span></div>
-  <ul class="dj-tree">{{ perms_lacking|dj_object_list:delete_confirmation_max_display }}</ul>
+  <ul class="dj-tree">{{ perms_lacking|dj_object_list:max_display }}</ul>
 {% elif protected %}
   <div class="dj-alert dj-alert--warning">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{% blocktranslate %}Deleting the selected {{ objects_name }} would require deleting the following protected related objects:{% endblocktranslate %}</span></div>
-  <ul class="dj-tree">{{ protected|dj_object_list:delete_confirmation_max_display }}</ul>
+  <ul class="dj-tree">{{ protected|dj_object_list:max_display }}</ul>
 {% else %}
   <div class="dj-confirm-card">
     <span class="dj-confirm-icon">{% dj_icon "trash" "dj-icon dj-icon--lg" %}</span>
@@ -37,7 +38,7 @@
     <details class="dj-confirm-details">
       <summary>{% translate "Objects" %}</summary>
       {% for deletable_object in deletable_objects %}
-        <ul class="dj-tree">{{ deletable_object|dj_object_list:delete_confirmation_max_display }}</ul>
+        <ul class="dj-tree">{{ deletable_object|dj_object_list:max_display }}</ul>
       {% endfor %}
     </details>
 
@@ -51,4 +52,5 @@
   </div>
 {% endif %}
 </div>
+{% endwith %}
 {% endblock %}

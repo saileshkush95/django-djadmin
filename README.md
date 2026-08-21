@@ -155,11 +155,27 @@ document stands on its own if it is picked up again.
 The dashboard's own charts (per-model sparklines and the admin-activity graph)
 are unrelated to that and remain part of djadmin — see `djadmin/charts.py`.
 
+## Documentation
+
+Full docs live in [`docs/`](docs/) — [installation](docs/installation.md),
+[configuration](docs/configuration.md), [ModelAdmin](docs/modeladmin.md),
+[authentication](docs/authentication.md) and
+[customising](docs/customising.md). Build them locally with
+`uv run --with mkdocs-material mkdocs serve`.
+
 ## Compatibility
 
-Django 4.2+ (developed and tested against Django 6.1), Python 3.10+.
-No runtime dependencies beyond Django; `segno` is optional and only used to draw
-the MFA QR code.
+| | |
+|---|---|
+| Python | 3.10 – 3.14 |
+| Django | 5.2 LTS, 6.0, 6.1 |
+
+Every combination is exercised in CI. Django 4.2 is not supported: it reached
+end of life in April 2026 and lacks the collapsible-fieldset markup the forms
+rely on.
+
+No runtime dependencies beyond Django; `segno` is optional and only used to
+draw the two-factor QR code.
 
 ## License
 

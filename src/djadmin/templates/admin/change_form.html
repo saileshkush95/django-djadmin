@@ -36,7 +36,7 @@
 <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" class="dj-form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
 <div>
 {% if action_form and not is_popup %}
-  {% change_form_admin_actions %}
+  {% dj_change_form_actions %}
   <input type="hidden" name="{{ action_checkbox_name }}" value="{{ original.pk|unlocalize }}">
 {% endif %}
 {% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}

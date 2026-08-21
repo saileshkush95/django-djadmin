@@ -72,7 +72,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django", specifier = ">=4.2" },
+    { name = "django", specifier = ">=5.2" },
     { name = "segno", marker = "extra == 'mfa'", specifier = ">=1.5" },
 ]
 provides-extras = ["mfa"]
