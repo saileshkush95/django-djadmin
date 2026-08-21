@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls djadmin %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+  {% dj_url 'app_list' opts.app_label as dj_app_url %}
+  <li><a href="{{ dj_app_url }}">{{ opts.app_config.verbose_name }}</a></li>
+  <li><a href="{% url opts|admin_urlname:'changelist' %}">{{ module_name }}</a></li>
+  <li><a href="{% url opts|admin_urlname:'change' object.pk|admin_urlquote %}">{{ object|truncatewords:"18" }}</a></li>
+  <li aria-current="page">{% translate 'History' %}</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div id="change-history" class="module dj-card">
+    {% if action_list %}
+      <ul class="dj-history">
+        {% for action in action_list %}
+          <li class="dj-history-item">
+            <span class="dj-history-dot"></span>
+            <div class="dj-history-body">
+              <p class="dj-history-msg">{{ action.get_change_message }}</p>
+              <p class="dj-history-meta">
+                <strong>{{ action.user.get_username }}</strong>{% if action.user.get_full_name %} ({{ action.user.get_full_name }}){% endif %}
+                · <time datetime="{{ action.action_time|date:'c' }}" title="{{ action.action_time|date:'DATETIME_FORMAT' }}">{{ action.action_time|date:"DATETIME_FORMAT" }}</time>
+              </p>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+      <nav class="paginator dj-pagination" aria-labelledby="pagination">
+        <h2 id="pagination" class="dj-visually-hidden">{% blocktranslate with name=opts.verbose_name %}Pagination {{ name }} entries{% endblocktranslate %}</h2>
+        <p class="dj-pagination-count"><strong>{{ action_list.paginator.count }}</strong> {% blocktranslate count counter=action_list.paginator.count %}entry{% plural %}entries{% endblocktranslate %}</p>
+        {% if pagination_required %}
+          <ul class="dj-pagination-pages">
+            {% for i in page_range %}
+              {% if i == action_list.paginator.ELLIPSIS %}<li><span class="dj-page-ellipsis">{{ i }}</span></li>
+              {% elif i == action_list.number %}<li><span class="this-page" aria-current="page">{{ i }}</span></li>
+              {% else %}<li><a href="?{{ page_var }}={{ i }}">{{ i }}</a></li>{% endif %}
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </nav>
+    {% else %}
+      <div class="dj-empty">
+        {% dj_icon "clock" "dj-icon dj-icon--xl" %}
+        <p>{% translate 'This object doesn’t have a change history. It probably wasn’t added via this admin site.' %}</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

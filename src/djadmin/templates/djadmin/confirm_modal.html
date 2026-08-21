@@ -1,0 +1,19 @@
+{% load i18n djadmin %}
+{% comment %}
+Host for delete confirmations. The body is fetched from Django's own
+confirmation view, so permissions, protected relations and the deletion tree
+are still computed server-side — this only changes where they are shown.
+Without JavaScript the links navigate to the full page as before.
+{% endcomment %}
+<div class="dj-overlay dj-modal" id="dj-confirm-modal" hidden>
+  <div class="dj-overlay-backdrop" data-dj-modal-close></div>
+  <div class="dj-modal-box" role="dialog" aria-modal="true" aria-labelledby="dj-modal-title" tabindex="-1">
+    <header class="dj-modal-head">
+      <h2 id="dj-modal-title">{% translate 'Confirm' %}</h2>
+      <button type="button" class="dj-icon-btn" data-dj-modal-close aria-label="{% translate 'Close' %}">{% dj_icon "x" %}</button>
+    </header>
+    <div class="dj-modal-body" id="dj-modal-body">
+      <div class="dj-modal-loading">{% translate 'Loading…' %}</div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin %}
+
+{% block bodyclass %}{{ block.super }} dj-auth{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block header %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div class="dj-auth-wrap">
+  <div class="dj-auth-card dj-auth-card--center">
+    <span class="dj-confirm-icon">{% dj_icon "check" "dj-icon dj-icon--lg" %}</span>
+    <h1>{% translate 'Logged out' %}</h1>
+    <p class="dj-muted">{% translate 'Thanks for spending some quality time with the web site today.' %}</p>
+    {% dj_url 'index' as dj_home %}
+    <a href="{{ dj_home }}" class="dj-btn dj-btn--primary">{% translate 'Log in again' %}</a>
+  </div>
+</div>
+{% endblock %}

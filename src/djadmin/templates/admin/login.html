@@ -1,0 +1,57 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static djadmin %}
+
+{% block title %}{% if form.errors %}{% translate "Error:" %} {% endif %}{{ block.super }}{% endblock %}
+{% block extrastyle %}{{ block.super }}{{ form.media }}{% endblock %}
+{% block bodyclass %}{{ block.super }} login dj-auth{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+{% block header %}{% endblock %}
+{% block usertools %}{% endblock %}
+{% block nav-global %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content_subtitle %}{% endblock %}
+
+{% block content %}
+{% djadmin_conf as dj %}
+<div class="dj-auth-wrap">
+  <div class="dj-auth-card">
+    <div class="dj-auth-brand">
+      <span class="dj-brand-mark">{% if dj.LOGO_URL %}<img src="{{ dj.LOGO_URL }}" alt="">{% else %}{{ dj.BRAND_SHORT }}{% endif %}</span>
+      <h1>{{ dj.BRAND }}</h1>
+      <p class="dj-muted">{% translate 'Sign in to continue' %}</p>
+    </div>
+
+    {% if form.errors and not form.non_field_errors %}
+      <div class="dj-alert dj-alert--danger errornote">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{% blocktranslate count counter=form.errors.items|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}</span></div>
+    {% endif %}
+    {% for error in form.non_field_errors %}
+      <div class="dj-alert dj-alert--danger errornote">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{{ error }}</span></div>
+    {% endfor %}
+    {% if user.is_authenticated %}
+      <div class="dj-alert dj-alert--warning">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{% blocktranslate trimmed %}You are authenticated as {{ username }}, but are not authorized to access this page. Would you like to login to a different account?{% endblocktranslate %}</span></div>
+    {% endif %}
+
+    <form action="{{ app_path }}" method="post" id="login-form" class="dj-auth-form">{% csrf_token %}
+      <div class="form-row dj-field">
+        {{ form.username.label_tag }}
+        <div class="dj-field-control">{{ form.username }}</div>
+        {{ form.username.errors }}
+      </div>
+      <div class="form-row dj-field">
+        {{ form.password.label_tag }}
+        <div class="dj-field-control">{{ form.password }}</div>
+        {{ form.password.errors }}
+        <input type="hidden" name="next" value="{{ next }}">
+      </div>
+      <button type="submit" class="dj-btn dj-btn--primary dj-btn--block">{% translate 'Log in' %}</button>
+      {% url 'admin_password_reset' as password_reset_url %}
+      {% if password_reset_url %}
+        <p class="dj-auth-alt password-reset-link"><a href="{{ password_reset_url }}">{% translate 'Forgotten your login credentials?' %}</a></p>
+      {% endif %}
+    </form>
+  </div>
+  <p class="dj-auth-foot">{% if dj.FOOTER %}{{ dj.FOOTER }}{% endif %}</p>
+</div>
+{% endblock %}

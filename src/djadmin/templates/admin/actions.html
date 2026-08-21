@@ -1,0 +1,25 @@
+{% load i18n djadmin %}
+<div class="actions dj-actions" data-dj-actions>
+  {% block actions %}
+    <div class="dj-actions-inner">
+      <span class="action-counter dj-actions-count" data-actions-icnt="{{ cl.result_list|length }}" aria-live="polite" aria-atomic="true">{{ selection_note }}</span>
+      {% if cl.result_count != cl.result_list|length %}
+        <span class="all hidden">{{ selection_note_all }}</span>
+        <span class="question hidden">
+          <a role="button" href="#">{% blocktranslate with cl.result_count as total_count %}Select all {{ total_count }} {{ module_name }}{% endblocktranslate %}</a>
+        </span>
+        <span class="clear hidden"><a role="button" href="#">{% translate "Clear selection" %}</a></span>
+      {% endif %}
+      <span class="dj-actions-spacer"></span>
+      {% block actions-form %}
+        <label class="dj-actions-select">
+          <span class="dj-visually-hidden">{% translate 'Action' %}</span>
+          {% for field in action_form %}{{ field }}{% endfor %}
+        </label>
+      {% endblock %}
+      {% block actions-submit %}
+        <button type="submit" class="dj-btn dj-btn--primary button" name="index" value="{{ action_index|default:0 }}">{% translate "Run" %}</button>
+      {% endblock %}
+    </div>
+  {% endblock %}
+</div>

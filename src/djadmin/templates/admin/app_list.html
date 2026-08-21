@@ -1,0 +1,37 @@
+{% load i18n djadmin %}
+{% if app_list %}
+  <div class="dj-app-grid">
+  {% for app in app_list %}
+    <section class="dj-app-card app-{{ app.app_label }}{% if app.app_url in request.path|urlencode %} current-app{% endif %}">
+      <header class="dj-app-card-head">
+        <a href="{{ app.app_url }}" class="dj-app-card-title section">{{ app.name }}</a>
+        <span class="dj-app-card-count">{{ app.models|length }}</span>
+      </header>
+      <ul class="dj-app-models">
+        {% for model in app.models %}
+          {% with model_name=model.object_name|lower %}
+          <li class="dj-app-model model-{{ model_name }}{% if model.admin_url in request.path|urlencode %} current-model{% endif %}">
+            {% if model.admin_url %}
+              <a class="dj-app-model-link" href="{{ model.admin_url }}" id="{{ app.app_label }}-{{ model_name }}">
+                <span class="dj-app-model-name">{{ model.name }}</span>
+                <span class="dj-app-model-go">{% if model.view_only %}{% translate 'View' %}{% else %}{% translate 'Change' %}{% endif %} {% dj_icon "chevron-right" "dj-icon dj-icon--xs" %}</span>
+              </a>
+            {% else %}
+              <span class="dj-app-model-link is-disabled" id="{{ app.app_label }}-{{ model_name }}"><span class="dj-app-model-name">{{ model.name }}</span></span>
+            {% endif %}
+            {% if model.add_url %}
+              <a class="dj-btn dj-btn--ghost dj-btn--icon addlink" href="{{ model.add_url }}" aria-describedby="{{ app.app_label }}-{{ model_name }}" title="{% translate 'Add' %}">{% dj_icon "plus" "dj-icon dj-icon--xs" %}</a>
+            {% endif %}
+          </li>
+          {% endwith %}
+        {% endfor %}
+      </ul>
+    </section>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="dj-empty">
+    {% dj_icon "shield" "dj-icon dj-icon--xl" %}
+    <p>{% translate 'You don’t have permission to view or edit anything.' %}</p>
+  </div>
+{% endif %}

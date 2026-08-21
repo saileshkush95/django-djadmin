@@ -1,0 +1,62 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin %}
+
+{% block bodyclass %}{{ block.super }} mfa-setup{% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+  <li><a href="{{ security_url }}">{% translate 'Security' %}</a></li>
+  <li aria-current="page">{% translate 'Two-factor authentication' %}</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="dj-setup">
+  {% if mfa_required %}
+    <div class="dj-alert dj-alert--warning">{% dj_icon "shield" "dj-icon dj-icon--sm" %}
+      <span>{% translate 'Two-factor authentication is required for your account. Finish this setup to continue.' %}</span>
+    </div>
+  {% endif %}
+
+  <div class="dj-setup-grid">
+    <section class="dj-card dj-setup-step">
+      <header class="dj-card-head"><h2><span class="dj-step">1</span>{% translate 'Scan the code' %}</h2></header>
+      <div class="dj-setup-body">
+        {% if qr %}
+          <div class="dj-qr">{{ qr }}</div>
+        {% else %}
+          <div class="dj-alert">{% dj_icon "alert" "dj-icon dj-icon--sm" %}
+            <span>{% translate 'Install the optional “segno” package to show a QR code here. Meanwhile, add the key by hand.' %}</span>
+          </div>
+        {% endif %}
+        <p class="dj-setup-hint">{% translate 'Open your authenticator app (1Password, Google Authenticator, Aegis…) and scan.' %}</p>
+
+        <details class="dj-setup-manual">
+          <summary>{% translate 'Can’t scan? Enter the key manually' %}</summary>
+          <p class="dj-secret" role="text">{{ secret_grouped }}</p>
+          <p class="dj-setup-hint">{% translate 'Type: time-based · 6 digits · 30 seconds' %}</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="dj-card dj-setup-step">
+      <header class="dj-card-head"><h2><span class="dj-step">2</span>{% translate 'Confirm the code' %}</h2></header>
+      <div class="dj-setup-body">
+        <p class="dj-setup-hint">{% translate 'Type the six digits your app is showing right now. This proves the pairing works before we switch it on.' %}</p>
+        <form method="post" class="dj-auth-form">{% csrf_token %}
+          <div class="form-row dj-field">
+            {{ form.token.label_tag }}
+            <div class="dj-field-control">{{ form.token }}</div>
+            {{ form.token.errors }}
+          </div>
+          <div class="dj-setup-actions">
+            <a class="dj-btn dj-btn--ghost" href="{{ security_url }}">{% translate 'Cancel' %}</a>
+            <button type="submit" class="dj-btn dj-btn--primary">{% translate 'Turn on two-factor' %}</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

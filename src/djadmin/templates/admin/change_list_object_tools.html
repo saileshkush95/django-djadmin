@@ -1,0 +1,11 @@
+{% load i18n admin_urls djadmin %}
+{% block object-tools-items %}
+  {% if has_add_permission %}
+    <li>
+      {% url cl.opts|admin_urlname:'add' as add_url %}
+      <a href="{% add_preserved_filters add_url is_popup to_field %}" class="dj-btn dj-btn--primary addlink" data-dj-add-link>
+        {% dj_icon "plus" "dj-icon dj-icon--sm" %}{% blocktranslate with cl.opts.verbose_name as name %}Add {{ name }}{% endblocktranslate %}
+      </a>
+    </li>
+  {% endif %}
+{% endblock %}

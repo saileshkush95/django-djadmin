@@ -1,0 +1,76 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+  <li aria-current="page">{% translate 'Security' %}</li>
+</ol>
+{% endblock %}
+
+{% block content_subtitle %}
+  <p class="dj-subtitle">{% translate 'How your admin account is protected.' %}</p>
+{% endblock %}
+
+{% block content %}
+<div class="dj-security">
+
+  <section class="dj-card dj-security-row">
+    <div class="dj-security-icon">{% dj_icon "key" %}</div>
+    <div class="dj-security-body">
+      <h2>{% translate 'Password' %}</h2>
+      <p class="dj-muted">{% translate 'Used for the first step of every sign-in.' %}</p>
+    </div>
+    <div class="dj-security-action">
+      <a class="dj-btn dj-btn--ghost" href="{{ password_url }}">{% translate 'Change password' %}</a>
+    </div>
+  </section>
+
+  {% if mfa_enabled %}
+  <section class="dj-card dj-security-row">
+    <div class="dj-security-icon">{% dj_icon "shield" %}</div>
+    <div class="dj-security-body">
+      <h2>
+        {% translate 'Two-factor authentication' %}
+        {% if device %}<span class="dj-badge dj-badge--success">{% translate 'On' %}</span>
+        {% elif mfa_required %}<span class="dj-badge dj-badge--danger">{% translate 'Required' %}</span>
+        {% else %}<span class="dj-badge">{% translate 'Off' %}</span>{% endif %}
+      </h2>
+      {% if device %}
+        <p class="dj-muted">
+          {% blocktranslate with when=device.confirmed_at|date:"DATETIME_FORMAT" %}Authenticator app added {{ when }}.{% endblocktranslate %}
+          {% if device.last_used_at %}{% blocktranslate with used=device.last_used_at|dj_ago %}Last used {{ used }}.{% endblocktranslate %}{% endif %}
+        </p>
+      {% else %}
+        <p class="dj-muted">{% translate 'Add a time-based code from an authenticator app as a second step at sign-in.' %}</p>
+      {% endif %}
+    </div>
+    <div class="dj-security-action">
+      {% if device %}
+        <a class="dj-btn dj-btn--ghost" href="{{ setup_url }}?reset=1">{% translate 'Replace device' %}</a>
+        {% if not mfa_required %}<a class="dj-btn dj-btn--danger-ghost" href="{{ disable_url }}">{% translate 'Turn off' %}</a>{% endif %}
+      {% else %}
+        <a class="dj-btn dj-btn--primary" href="{{ setup_url }}">{% dj_icon "shield" "dj-icon dj-icon--sm" %}{% translate 'Turn on' %}</a>
+      {% endif %}
+    </div>
+  </section>
+
+  {% if device %}
+  <section class="dj-card dj-security-row">
+    <div class="dj-security-icon">{% dj_icon "file" %}</div>
+    <div class="dj-security-body">
+      <h2>
+        {% translate 'Recovery codes' %}
+        <span class="dj-badge dj-badge--{% if recovery_count > 2 %}accent{% else %}warning{% endif %}">{{ recovery_count }}</span>
+      </h2>
+      <p class="dj-muted">{% translate 'Single-use codes that get you in when your authenticator is unavailable.' %}</p>
+    </div>
+    <div class="dj-security-action">
+      <a class="dj-btn dj-btn--ghost" href="{{ recovery_url }}">{% translate 'Generate new codes' %}</a>
+    </div>
+  </section>
+  {% endif %}
+  {% endif %}
+
+</div>
+{% endblock %}

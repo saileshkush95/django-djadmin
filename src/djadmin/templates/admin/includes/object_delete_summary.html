@@ -1,0 +1,7 @@
+{% load i18n %}
+<h3 class="dj-summary-title">{% translate "Summary" %}</h3>
+<ul class="dj-summary">
+  {% for model_name, object_count in model_count %}
+    <li><span class="dj-summary-count">{{ object_count }}</span> {{ model_name|capfirst }}</li>
+  {% endfor %}
+</ul>

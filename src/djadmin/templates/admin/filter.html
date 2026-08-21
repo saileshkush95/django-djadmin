@@ -1,0 +1,17 @@
+{% load i18n djadmin %}
+<details class="dj-filter" data-filter-title="{{ title }}" open>
+  <summary class="dj-filter-summary">
+    <span>{{ title|capfirst }}</span>
+    {% dj_icon "chevron-down" "dj-icon dj-icon--xs dj-filter-chevron" %}
+  </summary>
+  <ul class="dj-filter-choices">
+    {% for choice in choices %}
+      <li{% if choice.selected %} class="selected"{% endif %}>
+        <a href="{{ choice.query_string|iriencode }}">
+          <span class="dj-filter-check">{% if choice.selected %}{% dj_icon "check" "dj-icon dj-icon--xs" %}{% endif %}</span>
+          <span class="dj-filter-label">{{ choice.display }}</span>
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+</details>

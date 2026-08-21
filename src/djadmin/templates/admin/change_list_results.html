@@ -1,0 +1,55 @@
+{% load i18n djadmin %}
+{% if result_hidden_fields %}
+  <div class="hiddenfields dj-hidden">{% for item in result_hidden_fields %}{{ item }}{% endfor %}</div>
+{% endif %}
+{% if results %}
+<div class="results dj-table-wrap">
+  <table id="result_list" class="dj-table">
+    <thead>
+      <tr>
+        {% for header in result_headers %}
+          <th scope="col"{{ header.class_attrib }}>
+            <div class="dj-th">
+              {% if header.sortable %}
+                <a class="dj-th-link" href="{{ header.url_primary }}" role="button">
+                  <span class="text">{{ header.text|capfirst }}</span>
+                  {% if header.sort_priority > 0 %}
+                    <span class="dj-sort dj-sort--{{ header.ascending|yesno:'asc,desc' }}" aria-hidden="true">{{ header.ascending|yesno:'↑,↓' }}</span>
+                  {% else %}
+                    <span class="dj-sort dj-sort--idle" aria-hidden="true">↕</span>
+                  {% endif %}
+                </a>
+                {% if header.sort_priority > 0 %}
+                  <span class="sortoptions dj-th-tools">
+                    {% if num_sorted_fields > 1 %}<span class="sortpriority dj-sort-priority" title="{% blocktranslate with priority_number=header.sort_priority %}Sorting priority: {{ priority_number }}{% endblocktranslate %}">{{ header.sort_priority }}</span>{% endif %}
+                    <a class="sortremove dj-sort-remove" href="{{ header.url_remove }}" title="{% translate "Remove from sorting" %}">×</a>
+                  </span>
+                {% endif %}
+              {% else %}
+                <span class="text">{{ header.text|capfirst }}</span>
+              {% endif %}
+            </div>
+          </th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for result in results %}
+        {% if result.form and result.form.non_field_errors %}
+          <tr class="dj-row-errors"><td colspan="{{ result|length }}">{{ result.form.non_field_errors }}</td></tr>
+        {% endif %}
+        <tr>{% for item in result %}{{ item }}{% endfor %}</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="dj-empty dj-empty--table">
+  {% dj_icon "search" "dj-icon dj-icon--xl" %}
+  <p class="dj-empty-title">{% blocktranslate with name=cl.opts.verbose_name_plural %}No {{ name }} found{% endblocktranslate %}</p>
+  {% if cl.query or cl.has_active_filters %}
+    <p class="dj-empty-hint">{% translate 'Try a different search term, or clear the filters.' %}</p>
+    <a class="dj-btn dj-btn--ghost" href="{{ cl.clear_all_filters_qs }}">{% translate 'Clear all filters' %}</a>
+  {% endif %}
+</div>
+{% endif %}

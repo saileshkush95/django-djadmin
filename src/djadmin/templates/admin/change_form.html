@@ -1,0 +1,84 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static admin_modify djadmin %}
+
+{% block title %}{% if errors %}{% translate "Error:" %} {% endif %}{{ block.super }}{% endblock %}
+
+{% block extrahead %}{{ block.super }}
+  {% dj_url 'jsi18n' as dj_jsi18n %}<script src="{{ dj_jsi18n }}"></script>
+  {{ media }}
+{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-form{% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+  {% dj_url 'app_list' opts.app_label as dj_app_url %}
+  <li><a href="{{ dj_app_url }}">{{ opts.app_config.verbose_name }}</a></li>
+  <li>{% if has_view_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}</li>
+  <li aria-current="page">{% if add %}{% blocktranslate with name=opts.verbose_name %}Add {{ name }}{% endblocktranslate %}{% else %}{{ original|truncatewords:"18" }}{% endif %}</li>
+</ol>
+{% endblock %}
+
+{% block object-tools %}
+{% if change and not is_popup %}
+  <ul class="dj-object-tools object-tools">
+    {% block object-tools-items %}
+      {% change_form_object_tools %}
+    {% endblock %}
+  </ul>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="content-main" class="dj-form-page">
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" class="dj-form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
+<div>
+{% if action_form and not is_popup %}
+  {% change_form_admin_actions %}
+  <input type="hidden" name="{{ action_checkbox_name }}" value="{{ original.pk|unlocalize }}">
+{% endif %}
+{% if is_popup %}<input type="hidden" name="{{ is_popup_var }}" value="1">{% endif %}
+{% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}">{% endif %}
+{% if source_model %}<input type="hidden" name="{{ source_model_var }}" value="{{ source_model }}">{% endif %}
+{% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+
+{% if errors %}
+  <div class="dj-alert dj-alert--danger errornote">
+    {% dj_icon "alert" "dj-icon dj-icon--sm" %}
+    <span>{% blocktranslate count counter=errors|length %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktranslate %}</span>
+  </div>
+  {{ adminform.form.non_field_errors }}
+{% endif %}
+
+{% block field_sets %}
+  {% for fieldset in adminform %}
+    {% include "admin/includes/fieldset.html" with heading_level=2 prefix="fieldset" id_prefix=0 id_suffix=forloop.counter0 %}
+  {% endfor %}
+{% endblock %}
+
+{% block after_field_sets %}{% endblock %}
+
+{% block inline_field_sets %}
+  {% for inline_admin_formset in inline_admin_formsets %}
+    {% include inline_admin_formset.opts.template %}
+  {% endfor %}
+{% endblock %}
+
+{% block after_related_objects %}{% endblock %}
+
+{% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
+
+{% block admin_change_form_document_ready %}
+  <script id="django-admin-form-add-constants"
+          src="{% static 'admin/js/change_form.js' %}"
+          {% if adminform and add %}data-model-name="{{ opts.model_name }}"{% endif %}
+          async></script>
+{% endblock %}
+
+{% prepopulated_fields_js %}
+</div>
+</form>
+</div>
+{% endblock %}

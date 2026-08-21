@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Environments
+.venv/
+venv/
+.env
+
+# Django
+demo/db.sqlite3
+demo/staticfiles/
+demo/media/
+*.log
+
+# Tooling
+.uv/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local tooling state (contains machine-local tokens)
+.gstack/

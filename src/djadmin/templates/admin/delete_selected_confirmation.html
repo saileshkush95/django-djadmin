@@ -1,0 +1,54 @@
+{% extends "admin/base_site.html" %}
+{% load i18n l10n admin_urls static djadmin %}
+
+{% block extrahead %}{{ block.super }}
+  {{ media }}
+  <script src="{% static 'admin/js/cancel.js' %}" async></script>
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} delete-confirmation delete-selected-confirmation{% endblock %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+  {% dj_url 'app_list' opts.app_label as dj_app_url %}
+  <li><a href="{{ dj_app_url }}">{{ opts.app_config.verbose_name }}</a></li>
+  <li><a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a></li>
+  <li aria-current="page">{% translate 'Delete multiple objects' %}</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="dj-confirm">
+{% if perms_lacking %}
+  <div class="dj-alert dj-alert--danger">{% dj_icon "shield" "dj-icon dj-icon--sm" %}<span>{% blocktranslate %}Deleting the selected {{ objects_name }} would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktranslate %}</span></div>
+  <ul class="dj-tree">{{ perms_lacking|dj_object_list:delete_confirmation_max_display }}</ul>
+{% elif protected %}
+  <div class="dj-alert dj-alert--warning">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{% blocktranslate %}Deleting the selected {{ objects_name }} would require deleting the following protected related objects:{% endblocktranslate %}</span></div>
+  <ul class="dj-tree">{{ protected|dj_object_list:delete_confirmation_max_display }}</ul>
+{% else %}
+  <div class="dj-confirm-card">
+    <span class="dj-confirm-icon">{% dj_icon "trash" "dj-icon dj-icon--lg" %}</span>
+    <h2 class="dj-confirm-title">{% blocktranslate %}Delete the selected {{ objects_name }}?{% endblocktranslate %}</h2>
+    <p class="dj-confirm-text">{% translate 'All of the following objects and their related items will be deleted.' %}</p>
+
+    <div class="dj-confirm-summary">{% include "admin/includes/object_delete_summary.html" %}</div>
+
+    <details class="dj-confirm-details">
+      <summary>{% translate "Objects" %}</summary>
+      {% for deletable_object in deletable_objects %}
+        <ul class="dj-tree">{{ deletable_object|dj_object_list:delete_confirmation_max_display }}</ul>
+      {% endfor %}
+    </details>
+
+    <form method="post" class="dj-confirm-actions">{% csrf_token %}
+      {% for obj in queryset %}<input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk|unlocalize }}">{% endfor %}
+      <input type="hidden" name="action" value="delete_selected">
+      <input type="hidden" name="post" value="yes">
+      <a role="button" href="#" class="dj-btn dj-btn--ghost button cancel-link">{% translate "No, take me back" %}</a>
+      <input type="submit" class="dj-btn dj-btn--danger" value="{% translate 'Yes, I’m sure' %}">
+    </form>
+  </div>
+{% endif %}
+</div>
+{% endblock %}

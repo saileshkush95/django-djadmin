@@ -1,0 +1,118 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin log %}
+
+{% block coltype %}dj-has-rail{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block content_title %}
+  <h1 class="dj-title">{{ index_title|default:_('Dashboard') }}</h1>
+{% endblock %}
+{% block content_subtitle %}
+  <p class="dj-subtitle">{% blocktranslate with name=user.get_short_name|default:user.get_username %}Welcome back, {{ name }}.{% endblocktranslate %}</p>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" class="dj-dash">
+  {% if djadmin_stats %}
+  <div class="dj-stats">
+    {% for stat in djadmin_stats %}
+      <div class="dj-stat">
+        <a class="dj-stat-main" href="{{ stat.url }}">
+          <span class="dj-stat-icon">{% dj_icon stat.icon "dj-icon dj-icon--sm" %}</span>
+          <span class="dj-stat-label">{{ stat.label }}</span>
+          <span class="dj-stat-value">{{ stat.count|dj_number }}</span>
+          {% if stat.sparkline %}
+            <svg class="dj-spark" width="{{ stat.sparkline.width }}" height="{{ stat.sparkline.height }}"
+                 viewBox="0 0 {{ stat.sparkline.width }} {{ stat.sparkline.height }}" aria-hidden="true">
+              <path class="dj-spark-area" d="{{ stat.sparkline.area }}"></path>
+              <polyline class="dj-spark-line" points="{{ stat.sparkline.points }}"></polyline>
+              <circle class="dj-spark-dot" cx="{{ stat.sparkline.last_x }}" cy="{{ stat.sparkline.last_y }}" r="2.2"></circle>
+            </svg>
+          {% endif %}
+        </a>
+        <div class="dj-stat-foot">
+          {% if stat.trend %}
+            <span class="dj-trend dj-trend--{{ stat.trend.up|yesno:'up,down' }}">
+              {{ stat.trend.up|yesno:'▲,▼' }} {{ stat.trend.percent }}%
+            </span>
+            <span class="dj-muted">{% blocktranslate with n=stat.trend.recent %}{{ n }} this week{% endblocktranslate %}</span>
+          {% else %}
+            <span class="dj-muted">{{ stat.app_label }}</span>
+          {% endif %}
+          {% if stat.add_url %}<a class="dj-stat-add" href="{{ stat.add_url }}" title="{% translate 'Add' %}">{% dj_icon "plus" "dj-icon dj-icon--xs" %}</a>{% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if djadmin_activity %}
+  <section class="dj-card dj-chart-card">
+    <header class="dj-card-head">
+      <h2>{% translate 'Admin activity' %}</h2>
+      <span class="dj-chart-range">{% blocktranslate with n=djadmin_activity.days %}last {{ n }} days{% endblocktranslate %}</span>
+    </header>
+    <div class="dj-chart">
+      <svg class="dj-chart-svg" viewBox="0 0 {{ djadmin_activity.view_width }} {{ djadmin_activity.view_height }}"
+           preserveAspectRatio="none" role="img"
+           aria-label="{% blocktranslate with n=djadmin_activity.total days=djadmin_activity.days %}{{ n }} admin actions over the last {{ days }} days{% endblocktranslate %}">
+        {% for bar in djadmin_activity.bars %}
+          <rect class="dj-bar{% if bar.empty %} is-empty{% endif %}" x="{{ bar.x }}" y="{{ bar.y }}"
+                width="{{ bar.width }}" height="{{ bar.height }}" rx="1.5">
+            <title>{{ bar.date|date:"M j" }} · {{ bar.count }}</title>
+          </rect>
+        {% endfor %}
+      </svg>
+      <div class="dj-chart-axis">
+        <span>{{ djadmin_activity.first_date|date:"M j" }}</span>
+        <span>{% translate 'peak' %} {{ djadmin_activity.max }}</span>
+        <span>{{ djadmin_activity.last_date|date:"M j" }}</span>
+      </div>
+    </div>
+    <div class="dj-chart-legend">
+      <span class="dj-legend"><b>{{ djadmin_activity.total|dj_number }}</b> {% translate 'actions' %}</span>
+      <span class="dj-legend"><i class="dj-dot dj-dot--add"></i>{{ djadmin_activity.additions }} {% translate 'added' %}</span>
+      <span class="dj-legend"><i class="dj-dot dj-dot--change"></i>{{ djadmin_activity.changes }} {% translate 'changed' %}</span>
+      <span class="dj-legend"><i class="dj-dot dj-dot--delete"></i>{{ djadmin_activity.deletions }} {% translate 'deleted' %}</span>
+    </div>
+  </section>
+  {% endif %}
+
+  <h2 class="dj-section-title">{% translate 'Applications' %}</h2>
+  {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<aside class="dj-rail" id="content-related">
+  <section class="dj-card" id="recent-actions-module">
+    <header class="dj-card-head">
+      <h2>{% translate 'Recent actions' %}</h2>
+    </header>
+    {% get_admin_log 12 as admin_log for_user user %}
+    {% if not admin_log %}
+      <p class="dj-card-empty">{% translate 'None available' %}</p>
+    {% else %}
+      <ul class="dj-activity actionlist">
+        {% for entry in admin_log %}
+          <li class="dj-activity-item {% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% else %}deletelink{% endif %}">
+            <span class="dj-activity-dot dj-activity-dot--{% if entry.is_addition %}add{% elif entry.is_change %}change{% else %}delete{% endif %}"></span>
+            <div class="dj-activity-body">
+              {% if entry.is_deletion or not entry.get_admin_url %}
+                <span class="dj-activity-title">{{ entry.object_repr }}</span>
+              {% else %}
+                <a class="dj-activity-title" href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+              {% endif %}
+              <span class="dj-activity-meta">
+                {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% else %}{% translate 'Unknown content' %}{% endif %}
+                · <time datetime="{{ entry.action_time|date:'c' }}" title="{{ entry.action_time|date:'DATETIME_FORMAT' }}">{{ entry.action_time|dj_ago }}</time>
+              </span>
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+</aside>
+{% endblock %}

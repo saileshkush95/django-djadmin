@@ -1,0 +1,23 @@
+/*! djadmin — right-to-left overrides. */
+[dir="rtl"] .dj-sidebar { border-right: 0; border-left: 1px solid var(--dj-border); }
+[dir="rtl"] .is-sidebar-collapsed .dj-sidebar { transform: translateX(100%); }
+[dir="rtl"] .dj-menu { right: auto; left: 0; }
+[dir="rtl"] .dj-toasts { right: auto; left: 16px; }
+[dir="rtl"] .dj-toast { border-left: 1px solid var(--dj-border); border-right: 3px solid var(--dj-text-3); }
+[dir="rtl"] .dj-nav-group-toggle { transform: rotate(90deg); }
+[dir="rtl"] .dj-nav-group.is-open .dj-nav-group-toggle { transform: rotate(0); }
+[dir="rtl"] .dj-filter-chevron, [dir="rtl"] .dj-fieldset-chevron, [dir="rtl"] .dj-inline-chevron { transform: rotate(90deg); }
+[dir="rtl"] .dj-filter[open] .dj-filter-chevron,
+[dir="rtl"] .dj-fieldset-details[open] .dj-fieldset-chevron,
+[dir="rtl"] .dj-inline-details[open] .dj-inline-chevron { transform: rotate(0); }
+[dir="rtl"] .dj-table thead th, [dir="rtl"] .dj-table tbody th, [dir="rtl"] .dj-table tbody td { text-align: right; }
+[dir="rtl"] .dj-submit-right { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .dj-toolbar-actions { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .dj-topbar-actions { margin-left: 0; margin-right: auto; }
+[dir="rtl"] .dj-calendarnav-previous { left: auto; right: 8px; }
+[dir="rtl"] .dj-calendarnav-next { right: auto; left: 8px; }
+@media (max-width: 960px) {
+  [dir="rtl"] .dj-sidebar { left: auto; right: 0; transform: translateX(100%); }
+  [dir="rtl"] .dj-shell.is-sidebar-open .dj-sidebar { transform: none; }
+  [dir="rtl"] .dj-filters { right: auto; left: 0; border-width: 0 1px 0 0; }
+}

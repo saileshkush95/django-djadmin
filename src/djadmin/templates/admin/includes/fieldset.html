@@ -1,0 +1,49 @@
+{% load djadmin %}
+<fieldset class="module aligned dj-fieldset {{ fieldset.classes }}"{% if fieldset.name %} aria-labelledby="{{ prefix }}-{{ id_prefix }}-{{ id_suffix }}-heading"{% endif %}>
+  {% if fieldset.name %}
+    {% if fieldset.is_collapsible %}<details class="dj-fieldset-details"><summary class="dj-fieldset-summary">{% endif %}
+      <h{{ heading_level|default:2 }} id="{{ prefix }}-{{ id_prefix }}-{{ id_suffix }}-heading" class="fieldset-heading dj-fieldset-heading">{{ fieldset.name }}</h{{ heading_level|default:2 }}>
+    {% if fieldset.is_collapsible %}{% dj_icon "chevron-down" "dj-icon dj-icon--xs dj-fieldset-chevron" %}</summary>{% endif %}
+  {% endif %}
+
+  {% if fieldset.description %}
+    <div class="description dj-fieldset-description">{{ fieldset.description|safe }}</div>
+  {% endif %}
+
+  <div class="dj-fieldset-body">
+    {% for line in fieldset %}
+      <div class="form-row dj-row{% if not line.fields|length == 1 %} dj-row--multi form-multiline{% endif %}{% if not line.has_visible_field %} hidden dj-hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+        {% for field in line %}
+          <div class="dj-field{% if field.is_checkbox %} dj-field--check checkbox-row{% endif %}{% if not field.is_readonly and field.errors or line.fields|length == 1 and line.errors %} dj-field--error errors{% endif %}{% if field.field.is_hidden %} hidden dj-hidden{% endif %}{% if not line.fields|length == 1 %} fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endif %}">
+            {% if field.is_fieldset %}
+              <fieldset class="dj-subfieldset"{% if field.field.help_text %} aria-describedby="{{ field.field.id_for_label }}_helptext"{% endif %}>
+                {{ field.label_tag }}
+                <div class="dj-field-control">
+                  {% if field.is_readonly %}<div class="readonly dj-readonly">{{ field.contents }}</div>{% else %}{{ field.field }}{% endif %}
+                </div>
+              </fieldset>
+            {% elif field.is_checkbox %}
+              <div class="checkbox dj-check">
+                {{ field.field }}
+                {{ field.label_tag }}
+              </div>
+            {% else %}
+              {{ field.label_tag }}
+              <div class="dj-field-control">
+                {% if field.is_readonly %}<div class="readonly dj-readonly">{{ field.contents }}</div>{% else %}{{ field.field }}{% endif %}
+              </div>
+            {% endif %}
+
+            {% if field.field.help_text %}
+              <div class="help dj-help{% if field.field.is_hidden %} hidden dj-hidden{% endif %}"{% if field.field.id_for_label %} id="{{ field.field.id_for_label }}_helptext"{% endif %}>{{ field.field.help_text|safe }}</div>
+            {% endif %}
+
+            {% if line.fields|length == 1 %}{{ line.errors }}{% endif %}
+            {% if not line.fields|length == 1 and not field.is_readonly %}{{ field.errors }}{% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+  </div>
+  {% if fieldset.name and fieldset.is_collapsible %}</details>{% endif %}
+</fieldset>

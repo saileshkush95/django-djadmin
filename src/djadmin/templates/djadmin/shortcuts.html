@@ -1,0 +1,21 @@
+{% load i18n djadmin %}
+<div class="dj-overlay dj-shortcuts" id="dj-shortcuts" hidden>
+  <div class="dj-overlay-backdrop" data-dj-shortcuts-close></div>
+  <div class="dj-shortcuts-box" role="dialog" aria-modal="true" aria-labelledby="dj-shortcuts-title">
+    <div class="dj-shortcuts-head">
+      <h2 id="dj-shortcuts-title">{% translate 'Keyboard shortcuts' %}</h2>
+      <button type="button" class="dj-icon-btn" data-dj-shortcuts-close aria-label="{% translate 'Close' %}">{% dj_icon "x" %}</button>
+    </div>
+    <dl class="dj-shortcuts-list">
+      <div><dt>{% translate 'Open search' %}</dt><dd><kbd class="dj-kbd">⌘</kbd><kbd class="dj-kbd">K</kbd></dd></div>
+      <div><dt>{% translate 'Focus the list search' %}</dt><dd><kbd class="dj-kbd">/</kbd></dd></div>
+      <div><dt>{% translate 'Save the current form' %}</dt><dd><kbd class="dj-kbd">⌘</kbd><kbd class="dj-kbd">S</kbd></dd></div>
+      <div><dt>{% translate 'Add a new record' %}</dt><dd><kbd class="dj-kbd">C</kbd></dd></div>
+      <div><dt>{% translate 'Toggle the filters panel' %}</dt><dd><kbd class="dj-kbd">F</kbd></dd></div>
+      <div><dt>{% translate 'Collapse or expand the sidebar' %}</dt><dd><kbd class="dj-kbd">[</kbd></dd></div>
+      <div><dt>{% translate 'Cycle sidebar: full, icons, hidden' %}</dt><dd><kbd class="dj-kbd">⇧</kbd><kbd class="dj-kbd">[</kbd></dd></div>
+      <div><dt>{% translate 'Cycle the theme' %}</dt><dd><kbd class="dj-kbd">T</kbd></dd></div>
+      <div><dt>{% translate 'This dialog' %}</dt><dd><kbd class="dj-kbd">?</kbd></dd></div>
+    </dl>
+  </div>
+</div>

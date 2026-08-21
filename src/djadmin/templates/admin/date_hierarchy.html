@@ -1,0 +1,12 @@
+{% load i18n %}
+{% if show %}
+<nav class="toplinks dj-datenav" aria-labelledby="date-hierarchy-label">
+  <span id="date-hierarchy-label" class="dj-datenav-label">{% blocktranslate %}Filter by {{ field_name }}{% endblocktranslate %}</span>
+  {% if back %}<a href="{{ back.link }}" class="date-back dj-datenav-back">‹ {{ back.title }}</a>{% endif %}
+  <span class="dj-datenav-choices">
+    {% for choice in choices %}
+      {% if choice.link %}<a href="{{ choice.link }}">{{ choice.title }}</a>{% else %}<span class="is-current">{{ choice.title }}</span>{% endif %}
+    {% endfor %}
+  </span>
+</nav>
+{% endif %}

@@ -1,0 +1,26 @@
+{% load i18n djadmin %}
+{% if cl.search_fields %}
+<div id="toolbar" class="dj-search">
+  <h2 id="changelist-search-form" class="dj-visually-hidden">{% blocktranslate with name=cl.opts.verbose_name_plural %}Search {{ name }}{% endblocktranslate %}</h2>
+  <form id="changelist-search" method="get" role="search" aria-labelledby="changelist-search-form">
+    <div class="dj-search-field">
+      <label for="searchbar" class="dj-search-icon">{% dj_icon "search" "dj-icon dj-icon--sm" %}<span class="dj-visually-hidden">{% translate 'Search' %}</span></label>
+      <input type="text" name="{{ search_var }}" value="{{ cl.query }}" id="searchbar" autocomplete="off"
+             placeholder="{% blocktranslate with name=cl.opts.verbose_name_plural %}Search {{ name }}…{% endblocktranslate %}"
+             {% if cl.search_help_text %}aria-describedby="searchbar_helptext"{% endif %}>
+      {% if cl.query %}<a class="dj-search-clear" href="?{% for pair in cl.params.items %}{% if pair.0 != search_var %}{{ pair.0 }}={{ pair.1|urlencode }}&amp;{% endif %}{% endfor %}" aria-label="{% translate 'Clear search' %}">{% dj_icon "x" "dj-icon dj-icon--xs" %}</a>{% endif %}
+      <button type="submit" class="dj-search-submit">{% translate 'Search' %}</button>
+    </div>
+    {% for pair in cl.params.items %}
+      {% if pair.0 != search_var %}<input type="hidden" name="{{ pair.0 }}" value="{{ pair.1 }}">{% endif %}
+    {% endfor %}
+    {% if show_result_count %}
+      <p class="dj-search-count">
+        {% blocktranslate count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktranslate %}
+        (<a href="?{% if cl.is_popup %}{{ is_popup_var }}=1{% if cl.add_facets %}&amp;{% endif %}{% endif %}{% if cl.add_facets %}{{ is_facets_var }}{% endif %}">{% if cl.show_full_result_count %}{% blocktranslate with full_result_count=cl.full_result_count %}{{ full_result_count }} total{% endblocktranslate %}{% else %}{% translate "Show all" %}{% endif %}</a>)
+      </p>
+    {% endif %}
+    {% if cl.search_help_text %}<p class="dj-help" id="searchbar_helptext">{{ cl.search_help_text }}</p>{% endif %}
+  </form>
+</div>
+{% endif %}

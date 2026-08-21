@@ -1,0 +1,60 @@
+[project]
+name = "django-djadmin"
+dynamic = ["version"]
+description = "A clean, modern UI for the Django admin — dashboard, command palette and two-factor authentication."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Sandeep Kushwaha", email = "saileshkush95@gmail.com" }]
+keywords = ["django", "admin", "django-admin", "dashboard", "ui", "theme", "mfa", "2fa", "totp"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Web Environment",
+  "Framework :: Django",
+  "Framework :: Django :: 4.2",
+  "Framework :: Django :: 5.0",
+  "Framework :: Django :: 5.1",
+  "Framework :: Django :: 5.2",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet :: WWW/HTTP",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: User Interfaces",
+  "Typing :: Typed",
+]
+dependencies = ["Django>=4.2"]
+
+[project.optional-dependencies]
+# QR codes on the two-factor setup page (pure Python, no build step).
+mfa = ["segno>=1.5"]
+
+[project.urls]
+Homepage = "https://github.com/saileshkush95/django-djadmin"
+Source = "https://github.com/saileshkush95/django-djadmin"
+Issues = "https://github.com/saileshkush95/django-djadmin/issues"
+Changelog = "https://github.com/saileshkush95/django-djadmin/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/djadmin/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/djadmin"]
+
+[tool.hatch.build.targets.sdist]
+# Ship the demo and docs in the sdist so the project is reproducible from it.
+include = ["src/djadmin", "demo", "docs", "README.md", "LICENSE", "CHANGELOG.md", "pyproject.toml"]
+exclude = ["**/__pycache__", "**/*.pyc", "demo/db.sqlite3", "demo/staticfiles", "demo/media"]
+
+[dependency-groups]
+# Everything needed to run the demo and the test suite.
+dev = ["segno>=1.5"]

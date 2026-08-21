@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin %}
+
+{% block breadcrumbs %}
+<ol class="breadcrumbs">
+  <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+  <li><a href="{{ security_url }}">{% translate 'Security' %}</a></li>
+  <li aria-current="page">{% translate 'Recovery codes' %}</li>
+</ol>
+{% endblock %}
+
+{% block content %}
+<div class="dj-setup">
+  <div class="dj-alert dj-alert--warning">{% dj_icon "alert" "dj-icon dj-icon--sm" %}
+    <span>{% translate 'This is the only time these codes are shown. Store them somewhere safe — each one signs you in once if you lose your authenticator.' %}</span>
+  </div>
+
+  <section class="dj-card">
+    <header class="dj-card-head">
+      <h2>{% translate 'Recovery codes' %}</h2>
+      <button type="button" class="dj-btn dj-btn--ghost" data-dj-copy="#dj-codes">{% dj_icon "columns" "dj-icon dj-icon--sm" %}{% translate 'Copy' %}</button>
+    </header>
+    <ol class="dj-codes" id="dj-codes">
+      {% for code in codes %}<li>{{ code }}</li>{% endfor %}
+    </ol>
+    <div class="dj-card-foot">
+      <a class="dj-btn dj-btn--primary" href="{{ security_url }}">{% translate 'I’ve saved them' %}</a>
+    </div>
+  </section>
+</div>
+{% endblock %}

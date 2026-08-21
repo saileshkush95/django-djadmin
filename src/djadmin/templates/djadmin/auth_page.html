@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin %}
+{# Shared chrome-free layout for the anonymous auth pages (password reset).
+   Child templates fill the auth_card block. #}
+
+{% block bodyclass %}{{ block.super }} dj-auth{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block header %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content_subtitle %}{% endblock %}
+
+{% block content %}
+{% djadmin_conf as dj %}
+<div class="dj-auth-wrap">
+  <div class="dj-auth-card">
+    <div class="dj-auth-brand">
+      <span class="dj-brand-mark">{% if dj.LOGO_URL %}<img src="{{ dj.LOGO_URL }}" alt="">{% else %}{{ dj.BRAND_SHORT }}{% endif %}</span>
+      <h1>{% block auth_title %}{{ dj.BRAND }}{% endblock %}</h1>
+      <p class="dj-muted">{% block auth_lede %}{% endblock %}</p>
+    </div>
+    {% block auth_card %}{% endblock %}
+  </div>
+</div>
+{% endblock %}

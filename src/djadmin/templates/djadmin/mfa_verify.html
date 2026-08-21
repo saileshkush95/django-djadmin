@@ -1,0 +1,60 @@
+{% extends "admin/base_site.html" %}
+{% load i18n djadmin %}
+
+{% block bodyclass %}{{ block.super }} dj-auth mfa-verify{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+{% block header %}{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block content_title %}{% endblock %}
+{% block content_subtitle %}{% endblock %}
+
+{% block content %}
+{% djadmin_conf as dj %}
+<div class="dj-auth-wrap">
+  <div class="dj-auth-card">
+    <div class="dj-auth-brand">
+      <span class="dj-brand-mark dj-brand-mark--shield">{% dj_icon "shield" "dj-icon dj-icon--sm" %}</span>
+      <h1>{% translate 'Two-factor authentication' %}</h1>
+      <p class="dj-muted">
+        {% if use_recovery %}
+          {% translate 'Enter one of your saved recovery codes.' %}
+        {% else %}
+          {% blocktranslate %}Enter the code from your authenticator app for {{ masked_user }}.{% endblocktranslate %}
+        {% endif %}
+      </p>
+    </div>
+
+    {% if locked %}
+      <div class="dj-alert dj-alert--danger">{% dj_icon "alert" "dj-icon dj-icon--sm" %}
+        <span>{% translate 'Too many incorrect codes. Wait a few minutes and try again.' %}</span>
+      </div>
+    {% else %}
+      {% for error in form.non_field_errors %}
+        <div class="dj-alert dj-alert--danger">{% dj_icon "alert" "dj-icon dj-icon--sm" %}<span>{{ error }}</span></div>
+      {% endfor %}
+
+      <form method="post" class="dj-auth-form" action="{% if use_recovery %}{{ recovery_url }}{% else %}{{ verify_url }}{% endif %}">{% csrf_token %}
+        <div class="form-row dj-field">
+          {{ form.token.label_tag }}{{ form.recovery_code.label_tag }}
+          <div class="dj-field-control">{{ form.token }}{{ form.recovery_code }}</div>
+          {{ form.token.errors }}{{ form.recovery_code.errors }}
+        </div>
+        <button type="submit" class="dj-btn dj-btn--primary dj-btn--block">{% translate 'Verify' %}</button>
+      </form>
+
+      {% if attempts_left <= 2 %}
+        <p class="dj-auth-alt dj-muted">{% blocktranslate count counter=attempts_left %}{{ counter }} attempt left.{% plural %}{{ counter }} attempts left.{% endblocktranslate %}</p>
+      {% endif %}
+    {% endif %}
+
+    <div class="dj-auth-links">
+      {% if use_recovery %}
+        <a href="{{ verify_url }}">{% translate 'Use my authenticator app instead' %}</a>
+      {% elif has_recovery_codes %}
+        <a href="{{ recovery_url }}">{% translate 'I lost my device — use a recovery code' %}</a>
+      {% endif %}
+      <a href="{{ login_url }}">{% translate 'Sign in as someone else' %}</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

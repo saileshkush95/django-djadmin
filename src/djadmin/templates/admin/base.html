@@ -1,0 +1,208 @@
+{% load i18n static tz djadmin %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+{% djadmin_conf as dj %}{% djadmin_palette_url as dj_palette_url %}{% dj_url 'index' as dj_index_url %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" dir="{{ LANGUAGE_BIDI|yesno:'rtl,ltr,auto' }}" data-theme="{{ dj.THEME }}" data-density="{{ dj.DENSITY }}" data-sidebar="{{ dj.SIDEBAR }}" data-sidebar-toggle="{{ dj.SIDEBAR_TOGGLE }}">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}{% endblock %}</title>
+<meta name="color-scheme" content="light dark">
+{% block responsive %}<meta name="viewport" content="width=device-width, initial-scale=1">{% endblock %}
+<link rel="stylesheet" href="{% block stylesheet %}{% static "djadmin/css/djadmin.css" %}{% endblock %}">
+<style>:root{--dj-accent:{{ dj.ACCENT }};--dj-accent-fg:{{ dj.ACCENT_FG }};}</style>
+{% block dark-mode-vars %}<script src="{% static "djadmin/js/theme.js" %}"></script>{% endblock %}
+{% block extrastyle %}{% endblock %}
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% block stylesheet_rtl %}{% static "djadmin/css/djadmin-rtl.css" %}{% endblock %}">{% endif %}
+{% block extrahead %}{% endblock %}
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+</head>
+
+<body class="dj {% if is_popup %}dj-is-popup popup {% endif %}{% block bodyclass %}{% endblock %}"
+      data-admin-utc-offset="{% now "Z" %}"
+      data-admin-server-timezone="{% get_current_timezone as time_zone %}{{ time_zone }}">
+{% include "djadmin/icons.html" %}
+<a href="#dj-content" class="dj-skip skip-to-content-link">{% translate 'Skip to main content' %}</a>
+
+{% if is_popup %}
+  {# Related-object popups drop the chrome but keep the same content block. #}
+  <main id="dj-content" class="dj-popup-shell" tabindex="-1">
+{% else %}
+<div class="dj-shell" id="dj-shell">
+
+  {% block nav-sidebar %}
+  <aside class="dj-sidebar" id="dj-sidebar" aria-label="{% translate 'Sections' %}">
+    <div class="dj-sidebar-head">
+      {% block branding %}
+      <a class="dj-brand" href="{{ dj_index_url|default:'/' }}">
+        <span class="dj-brand-mark" aria-hidden="true">{% if dj.LOGO_URL %}<img src="{{ dj.LOGO_URL }}" alt="">{% else %}{{ dj.BRAND_SHORT }}{% endif %}</span>
+        <span class="dj-brand-name">{{ dj.BRAND }}</span>
+      </a>
+      {% endblock %}
+      <button type="button" class="dj-icon-btn dj-sidebar-close" data-dj-sidebar-toggle aria-label="{% translate 'Close navigation' %}">{% dj_icon "x" %}</button>
+    </div>
+
+    {% if dj.COMMAND_PALETTE and has_permission %}
+    <button type="button" class="dj-palette-trigger" data-dj-palette-open>
+      {% dj_icon "search" "dj-icon dj-icon--sm" %}
+      <span>{% translate 'Search' %}…</span>
+      <kbd class="dj-kbd">⌘K</kbd>
+    </button>
+    {% endif %}
+
+    <nav class="dj-nav" aria-label="{% translate 'Applications' %}" data-accordion="{{ dj.NAV_ACCORDION|yesno:'1,0' }}">
+      {% if has_permission %}
+        <a class="dj-nav-link{% if request.path == dj_index_url %} is-active{% endif %}" href="{{ dj_index_url }}" title="{% translate 'Dashboard' %}">
+          {% dj_icon "grid" "dj-icon dj-icon--sm" %}<span>{% translate 'Dashboard' %}</span>
+        </a>
+      {% endif %}
+      {% djadmin_nav as dj_nav %}
+      {% for app in dj_nav %}
+        <div class="dj-nav-group is-open">
+          <div class="dj-nav-group-head">
+            <span class="dj-nav-group-icon">{% dj_icon app.icon "dj-icon dj-icon--sm" %}</span>
+            <a class="dj-nav-group-title" href="{{ app.url }}" title="{{ app.label }}">{{ app.label }}</a>
+            <button type="button" class="dj-nav-group-toggle" data-dj-nav-toggle aria-expanded="true" aria-label="{% blocktranslate with name=app.label %}Toggle {{ name }}{% endblocktranslate %}">{% dj_icon "chevron-down" "dj-icon dj-icon--xs" %}</button>
+          </div>
+          <ul class="dj-nav-list">
+            {% for model in app.models %}
+              <li>
+                <a class="dj-nav-link{% if model.active %} is-active{% endif %}" href="{{ model.url|default:'#' }}" title="{{ model.label }}"{% if model.active %} aria-current="page"{% endif %}>
+                  {% dj_icon model.icon "dj-icon dj-icon--sm" %}<span>{{ model.label }}</span>
+                </a>
+                {% if model.add_url %}<a class="dj-nav-add" href="{{ model.add_url }}" title="{% blocktranslate with name=model.label %}Add {{ name }}{% endblocktranslate %}">{% dj_icon "plus" "dj-icon dj-icon--xs" %}</a>{% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </nav>
+
+    <div class="dj-sidebar-foot">
+      {% block sidebar_foot %}
+        {% if dj.FOOTER %}<p class="dj-sidebar-note">{{ dj.FOOTER }}</p>{% endif %}
+      {% endblock %}
+    </div>
+  </aside>
+  {% endblock %}
+
+  <button type="button" class="dj-sidebar-backdrop" data-dj-sidebar-toggle aria-hidden="true" tabindex="-1"></button>
+
+  <div class="dj-frame">
+    {% block header %}
+    <header class="dj-topbar" id="dj-topbar">
+      <button type="button" class="dj-icon-btn dj-menu-btn" data-dj-sidebar-toggle aria-label="{% translate 'Toggle navigation' %}">{% dj_icon "menu" %}</button>
+
+      {% block nav-breadcrumbs %}
+        <nav class="dj-breadcrumbs" aria-label="{% translate 'Breadcrumbs' %}">
+          {% block breadcrumbs %}
+            <ol class="breadcrumbs">
+              <li><a href="{{ dj_index_url }}">{% translate 'Home' %}</a></li>
+              {% if title %}<li aria-current="page">{{ title }}</li>{% endif %}
+            </ol>
+          {% endblock %}
+        </nav>
+      {% endblock %}
+
+      <div class="dj-topbar-actions">
+        {% if dj.COMMAND_PALETTE and has_permission %}
+          <button type="button" class="dj-icon-btn dj-topbar-search" data-dj-palette-open aria-label="{% translate 'Search' %}" title="{% translate 'Search' %} (⌘K)">{% dj_icon "search" %}</button>
+        {% endif %}
+        <button type="button" class="dj-icon-btn dj-theme-toggle" data-dj-theme-toggle aria-label="{% translate 'Toggle theme' %}" title="{% translate 'Toggle theme' %}">
+          <span class="dj-theme-icon dj-theme-icon--auto">{% dj_icon "monitor" %}</span>
+          <span class="dj-theme-icon dj-theme-icon--light">{% dj_icon "sun" %}</span>
+          <span class="dj-theme-icon dj-theme-icon--dark">{% dj_icon "moon" %}</span>
+        </button>
+        {% block usertools %}
+        {% if has_permission %}
+        <div class="dj-user" data-dj-menu>
+          <button type="button" class="dj-user-btn" data-dj-menu-btn aria-haspopup="true" aria-expanded="false">
+            <span class="dj-avatar dj-avatar--sm"><span class="dj-avatar-initials">{% firstof user.get_short_name user.get_username as who %}{{ who|dj_initials }}</span></span>
+            <span class="dj-user-name">{% block welcome-msg %}{{ who }}{% endblock %}</span>
+            {% dj_icon "chevron-down" "dj-icon dj-icon--xs" %}
+          </button>
+          <div class="dj-menu" data-dj-menu-panel role="menu">
+            {% block userlinks %}
+              <div class="dj-menu-head">
+                <strong>{{ who }}</strong>
+                {% if user.email %}<span class="dj-muted">{{ user.email }}</span>{% endif %}
+              </div>
+              {% if site_url %}<a class="dj-menu-item" href="{{ site_url }}" role="menuitem">{% dj_icon "external" "dj-icon dj-icon--sm" %}{% translate 'View site' %}</a>{% endif %}
+              {% url 'django-admindocs-docroot' as docsroot %}
+              {% if docsroot and user.is_active and user.is_staff %}<a class="dj-menu-item" href="{{ docsroot }}" role="menuitem">{% dj_icon "file" "dj-icon dj-icon--sm" %}{% translate 'Documentation' %}</a>{% endif %}
+              {% dj_url 'djadmin_security' as dj_security_url %}
+              {% if dj_security_url %}
+                <a class="dj-menu-item" href="{{ dj_security_url }}" role="menuitem">
+                  {% dj_icon "shield" "dj-icon dj-icon--sm" %}{% translate 'Security' %}
+                  {% if djadmin_mfa_enabled %}<span class="dj-badge dj-badge--{% if djadmin_mfa_active %}success{% else %}warning{% endif %} dj-menu-badge">{% if djadmin_mfa_active %}2FA{% else %}{% translate 'Off' %}{% endif %}</span>{% endif %}
+                </a>
+              {% endif %}
+              {% dj_url 'password_change' as dj_password_url %}
+              {% if user.has_usable_password and dj_password_url %}<a class="dj-menu-item" href="{{ dj_password_url }}" role="menuitem">{% dj_icon "key" "dj-icon dj-icon--sm" %}{% translate 'Change password' %}</a>{% endif %}
+              <button type="button" class="dj-menu-item" data-dj-shortcuts-open role="menuitem">{% dj_icon "sparkle" "dj-icon dj-icon--sm" %}{% translate 'Keyboard shortcuts' %}</button>
+              {% dj_url 'logout' as dj_logout_url %}
+              {% if dj_logout_url %}
+              <form id="logout-form" class="dj-menu-form" method="post" action="{{ dj_logout_url }}">{% csrf_token %}
+                <button type="submit" class="dj-menu-item dj-menu-item--danger" role="menuitem">{% dj_icon "logout" "dj-icon dj-icon--sm" %}{% translate 'Log out' %}</button>
+              </form>
+              {% endif %}
+            {% endblock %}
+          </div>
+        </div>
+        {% endif %}
+        {% endblock %}
+      </div>
+      {% block nav-global %}{% endblock %}
+    </header>
+    {% endblock %}
+
+    <main id="dj-content" class="dj-content {% block coltype %}colM{% endblock %}" tabindex="-1">
+      <div class="dj-page">
+{% endif %}
+
+        <div class="dj-page-head titles-and-tools">
+          <div class="titles">
+            {% block pretitle %}{% endblock %}
+            {% block content_title %}{% if title %}<h1 class="dj-title">{{ title }}</h1>{% endif %}{% endblock %}
+            {% block content_subtitle %}{% if subtitle %}<h2 class="dj-subtitle">{{ subtitle }}</h2>{% endif %}{% endblock %}
+          </div>
+          {% block object-tools %}{% endblock %}
+        </div>
+
+        <div id="content" class="dj-page-body">
+          {% block content %}{{ content }}{% endblock %}
+        </div>
+
+{% if is_popup %}
+  </main>
+{% else %}
+      </div>
+
+      {% block sidebar %}{% endblock %}
+    </main>
+
+    <footer class="dj-footer">{% block footer %}{% endblock %}</footer>
+  </div>
+</div>
+{% endif %}
+
+{% block messages %}
+  <div class="dj-toasts" id="dj-toasts" role="status" aria-live="polite">
+    {% if messages %}{% for message in messages %}
+      <div class="dj-toast dj-toast--{{ message.level_tag|default:'info' }} messagelist{% if message.tags %} {{ message.tags }}{% endif %}">
+        <span class="dj-toast-icon">{% if message.level_tag == 'error' %}{% dj_icon "alert" "dj-icon dj-icon--sm" %}{% elif message.level_tag == 'warning' %}{% dj_icon "alert" "dj-icon dj-icon--sm" %}{% else %}{% dj_icon "check" "dj-icon dj-icon--sm" %}{% endif %}</span>
+        <span class="dj-toast-text">{{ message|capfirst }}</span>
+        <button type="button" class="dj-toast-close" data-dj-toast-close aria-label="{% translate 'Close' %}">{% dj_icon "x" "dj-icon dj-icon--xs" %}</button>
+      </div>
+    {% endfor %}{% endif %}
+  </div>
+{% endblock messages %}
+
+{% if not is_popup %}
+  {% if dj.COMMAND_PALETTE and has_permission %}{% include "djadmin/palette.html" %}{% endif %}
+  {% include "djadmin/shortcuts.html" %}
+  {% if dj.CONFIRM_MODAL %}{% include "djadmin/confirm_modal.html" %}{% endif %}
+{% endif %}
+
+<script src="{% static "djadmin/js/djadmin.js" %}" defer></script>
+{% block extrabody %}{% endblock extrabody %}
+</body>
+</html>
